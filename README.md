@@ -40,7 +40,7 @@ mytaxi-app/
 
 📦 Installation
 1️⃣ Clone the repository
-git clone https://github.com/username/mytaxi-app.git
+git clone https://github.com/azimjon-95/mytaxi-mobile-client.git
 cd mytaxi-app
 
 2️⃣ Install dependencies
