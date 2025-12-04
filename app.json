@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "mytaxi-app",
-    "slug": "mytaxi-app",
+    "name": "My Taxi",
+    "slug": "My Taxi",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./src/assets/taxi.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./src/assets/taxi.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,13 +17,19 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./src/assets/taxi.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.anonymous.mytaxiapp"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./src/assets/taxi.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "3e72e770-9146-4a08-8708-6dfae3fc12e6"
+      }
     }
   }
 }

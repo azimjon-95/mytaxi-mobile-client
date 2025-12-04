@@ -1,0 +1,85 @@
+
+import { StyleSheet } from "react-native";
+
+export default StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#101820",
+        justifyContent: "center",
+        padding: 24,
+    },
+    headerContainer: {
+        marginBottom: 40,
+        alignItems: "center",
+    },
+    title: {
+        fontSize: 28,
+        fontWeight: "bold",
+        color: "#FFC400",
+        textAlign: "center",
+        marginBottom: 12,
+        textShadowColor: "rgba(255,194,0,0.6)",
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 8,
+    },
+    subtitle: {
+        fontSize: 16,
+        color: "rgba(255,194,0,0.7)",
+        textAlign: "center",
+    },
+    input: {
+        borderWidth: 2,
+        borderColor: "#FFC400",
+        backgroundColor: "rgba(255,194,0,0.05)",
+        padding: 20,
+        borderRadius: 12,
+        fontSize: 32,
+        fontWeight: "bold",
+        color: "#FFC400",
+        letterSpacing: 16,
+        marginBottom: 24,
+        shadowColor: "#FFC400",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 5,
+    },
+    btn: {
+        backgroundColor: "#FFC400",
+        padding: 18,
+        borderRadius: 12,
+        shadowColor: "#FFC400",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.5,
+        shadowRadius: 12,
+        elevation: 8,
+        marginBottom: 16,
+    },
+    btnDisabled: {
+        opacity: 0.5,
+    },
+    btnText: {
+        color: "#101820",
+        textAlign: "center",
+        fontSize: 18,
+        fontWeight: "bold",
+        letterSpacing: 0.5,
+    },
+    resendBtn: {
+        padding: 12,
+        alignItems: "center",
+    },
+    resendText: {
+        color: "#FFC400",
+        fontSize: 16,
+        fontWeight: "600",
+        textDecorationLine: "underline",
+    },
+    disclaimer: {
+        marginTop: 24,
+        fontSize: 13,
+        color: "rgba(255,194,0,0.6)",
+        textAlign: "center",
+        lineHeight: 18,
+    },
+});
