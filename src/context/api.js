@@ -1,11 +1,14 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Bazaviy query – token bilan headers tayyorlash
 const rawBaseQuery = fetchBaseQuery({
     baseUrl: "http://localhost:5050/api/v1", // backend manzilingiz
-    prepareHeaders: (headers) => {
-        const token = localStorage.getItem("token"); // yoki AsyncStorage agar React Native bo'lsa
+    prepareHeaders: async (headers) => {
+        let token = await AsyncStorage.getItem("token");
         if (token) {
+            token = token.replace(/"/g, "");
+
             headers.set("Authorization", `Bearer ${token}`);
         }
         return headers;
@@ -33,6 +36,6 @@ const baseQuery = async (args, api, extraOptions) => {
 export const api = createApi({
     reducerPath: "splitApi",
     baseQuery,
-    tagTypes: [], // kerak bo'lsa taglar qo'shish mumkin
+    tagTypes: ["Orders"], // kerak bo'lsa taglar qo'shish mumkin
     endpoints: () => ({}),
 });

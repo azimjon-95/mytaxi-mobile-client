@@ -4,6 +4,7 @@ export const clientApi = api.injectEndpoints({
     endpoints: (builder) => ({
         // Yangi foydalanuvchi yaratish
         saveUser: builder.mutation({
+
             query: (userData) => ({
                 url: "/client",
                 method: "POST",
@@ -46,6 +47,7 @@ export const clientApi = api.injectEndpoints({
                 body: { phone, pin },
             }),
         }),
+
     }),
     overrideExisting: false,
 });

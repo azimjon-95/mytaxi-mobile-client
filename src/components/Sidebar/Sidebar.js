@@ -1,4 +1,4 @@
-// Sidebar.js (yangilangan - sidebar stillari import qilindi)
+// Sidebar.js (yangilangan - sidebar stillari import qilindi, orderHistory mock data va yuklash funksiyasi o'z ichiga ko'chirildi)
 import React, { useState, useEffect } from "react";
 import {
     View,
@@ -13,8 +13,9 @@ import sidebarStyles from "./styles"; // Sidebar uchun alohida stillar
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { PhoneNumberFormat } from "../../hooks/NumberFormat";
 
-export default function Sidebar({ visible, onClose, userData, cashback, orderHistory, navigation }) {
+export default function Sidebar({ visible, onClose, userData, cashback, navigation }) {
     const slideAnim = useState(new Animated.Value(-300))[0];
+    const [orderHistory, setOrderHistory] = useState([]); // <-- Qo'shildi: Sidebar ichida orderHistory state
 
     useEffect(() => {
         Animated.timing(slideAnim, {
@@ -23,6 +24,54 @@ export default function Sidebar({ visible, onClose, userData, cashback, orderHis
             useNativeDriver: true,
         }).start();
     }, [visible]);
+
+    // <-- Qo'shildi: orderHistory yuklash funksiyasi va useEffect
+    useEffect(() => {
+        loadOrderHistory();
+    }, []);
+
+    const loadOrderHistory = async () => {
+        try {
+            const history = await AsyncStorage.getItem("orderHistory");
+            if (history) {
+                setOrderHistory(JSON.parse(history));
+            } else {
+                const mockHistory = [
+                    {
+                        id: 1,
+                        date: "2024-12-01",
+                        time: "14:30",
+                        from: "Chilonzor",
+                        to: "Sergeli",
+                        price: 25000,
+                        cashback: 2500,
+                    },
+                    {
+                        id: 2,
+                        date: "2024-11-28",
+                        time: "09:15",
+                        from: "Yunusobod",
+                        to: "Mirzo Ulugbek",
+                        price: 18000,
+                        cashback: 1800,
+                    },
+                    {
+                        id: 3,
+                        date: "2024-11-25",
+                        time: "18:45",
+                        from: "Amir Temur",
+                        to: "Chorsu",
+                        price: 15000,
+                        cashback: 1500,
+                    },
+                ];
+                setOrderHistory(mockHistory);
+                await AsyncStorage.setItem("orderHistory", JSON.stringify(mockHistory));
+            }
+        } catch (e) {
+            console.error("Order history yuklashda xatolik:", e);
+        }
+    };
 
     const handleLogout = async () => {
         try {

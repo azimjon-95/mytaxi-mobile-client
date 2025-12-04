@@ -45,14 +45,14 @@ function getRandomPositionsInCircle(cx, cy, r, iconSize = ICON_SIZE) {
     return positions;
 }
 
-// Mock taxis
+// Mock taxis (internal to component)
 const mockTaxis = [
     { id: 1, name: "Cobalt", number: "01 A 777 AA", driver: "Azizbek Karimov", phone: 998915678899, color: "Oq", eta: 7 },
     { id: 2, name: "Gentra", number: "01 B 456 BB", driver: "Doniyor Sattorov", phone: 998931234567, color: "Qora", eta: 5 },
     { id: 3, name: "Damas", number: "01 C 999 CC", driver: "Otabek Xolmatov", phone: 998997070777, color: "Kumush", eta: 3 },
 ];
 
-export default function RadarWithCars({ size = 340, taxis = mockTaxis }) {
+export default function RadarWithCars({ size = 340 }) {
     const spin = useRef(new Animated.Value(0)).current;
     const approachAnim = useRef(new Animated.Value(0)).current;
 
@@ -184,7 +184,7 @@ export default function RadarWithCars({ size = 340, taxis = mockTaxis }) {
                         <TouchableOpacity
                             key={i}
                             style={{ position: "absolute", left: pos.x, top: pos.y }}
-                            onPress={() => handleSelectTaxi(taxis[i], i)}
+                            onPress={() => handleSelectTaxi(mockTaxis[i], i)}
                         >
                             <Image
                                 source={require("../../assets/taxi.png")}
@@ -260,7 +260,7 @@ export default function RadarWithCars({ size = 340, taxis = mockTaxis }) {
                     }}
                     contentContainerStyle={{ paddingBottom: 10 }} // scroll uchun ichki padding
                 >
-                    {taxis.map((taxi, index) => (
+                    {mockTaxis.map((taxi, index) => (
                         <TouchableOpacity
                             key={taxi.id}
                             onPress={() => handleSelectTaxi(taxi, index)}

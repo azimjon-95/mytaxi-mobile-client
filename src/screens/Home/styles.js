@@ -242,4 +242,10 @@ export default StyleSheet.create({
         fontWeight: 'bold',
         color: '#ff6b35',
     },
+
+    mapContainer: { flex: 1 },
+    map: { flex: 1 },
+    mapButtons: { position: 'absolute', bottom: 50, left: 20, right: 20, flexDirection: 'row', justifyContent: 'space-around' },
+    confirmBtn: { padding: 15, borderRadius: 10, minWidth: 120 },
+    confirmBtnText: { color: 'white', textAlign: 'center', fontWeight: 'bold' },
 });

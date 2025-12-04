@@ -12,6 +12,7 @@ export default function PhoneScreen({ navigation }) {
     const { data: user, isFetching, refetch } = useGetUserByPhoneQuery(phone, {
         skip: phone.length < 9, // telefon noto‘g‘ri bo‘lsa fetch qilmaydi
     });
+    console.log(user);
 
     const handleCheckPhone = async () => {
         if (phone.length < 9) {
