@@ -5,47 +5,75 @@ import {
     Modal,
     Pressable,
     ActivityIndicator,
+    TouchableOpacity,
+    ScrollView,
+    Image,
 } from "react-native";
+import { useDispatch } from "react-redux";
 import * as Location from "expo-location";
-import * as Notifications from "expo-notifications";
+import { setActiveOrder, setOrderLoading } from "../../context/actions/orderSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCreateOrderMutation } from "../../context/orderApi";
+
 import dayjs from "dayjs";
-import styles from "./styles";
+import styles from "./styles/SliderStyles";
+import { Notification } from "../../components/Notification";
+
+const carTypes = [
+    {
+        label: "Ekanom",
+        value: "econom",
+        image: require("../../assets/cars/ekanom.png"),
+    },
+    {
+        label: "Komfort",
+        value: "comfort",
+        image: require("../../assets/cars/kamfort.png"),
+    },
+    {
+        label: "Damas",
+        value: "damas",
+        image: require("../../assets/cars/damas.png"),
+    },
+    {
+        label: "Labo",
+        value: "labo",
+        image: require("../../assets/cars/04.png"),
+    },
+];
 
 const TimeSelectionModal = ({ visible, onClose, setTimeSelected }) => {
+    const dispatch = useDispatch();
     const timeOptions = [
-        { label: "Hozir", value: "waiting" },
-        { label: 15, value: "created" },
-        { label: 25, value: "created" },
-        { label: 1, value: "created" }, // 1 soat
+        { label: "Chaqirish", value: "waiting" },
+        // { label: "Hozir", value: "waiting" },
+        // { label: 15, value: "created" },
+        // { label: 25, value: "created" },
+        // { label: 1, value: "created" }, // 1 soat
     ];
-
+    const [selectedService, setSelectedService] = useState(null);
     const [createOrder, { isLoading }] = useCreateOrderMutation();
     const [selectedTime, setSelectedTime] = useState(null);
+    const [selectedCar, setSelectedCar] = useState("econom"); // DEFAULT EKANOM
 
-    const showNotification = async (title, body) => {
-        await Notifications.scheduleNotificationAsync({
-            content: { title, body, sound: true, priority: Notifications.AndroidNotificationPriority.HIGH },
-            trigger: null,
-        });
-    };
+
 
     const sendOrder = async (timeOption) => {
         setSelectedTime(timeOption.label);
+        dispatch(setOrderLoading(true)); // 🔥 loading = true
 
         try {
             const userJson = await AsyncStorage.getItem("userData");
             const user = userJson ? JSON.parse(userJson) : null;
             if (!user) {
-                showNotification("Xatolik", "Foydalanuvchi ma'lumotlari topilmadi!");
+                Notification("Foydalanuvchi ma'lumotlari topilmadi", "error");
                 setSelectedTime(null);
                 return;
             }
 
             const { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== "granted") {
-                showNotification("Ruxsat kerak", "Geolokatsiya yoqilmagan!");
+                Notification("Location ruxsat berilmadi", "error");
                 setSelectedTime(null);
                 return;
             }
@@ -59,14 +87,11 @@ const TimeSelectionModal = ({ visible, onClose, setTimeSelected }) => {
             const orderPrice = Math.floor(Math.random() * 30000) + 15000;
             const orderCashback = Math.floor(orderPrice * 0.1);
 
-            // Vaqtni aniqlash
             let orderTime = dayjs();
             if (timeOption.value === "created") {
-                if (timeOption.label >= 1 && timeOption.label <= 6) {
-                    // 1 soat (agar soat bo‘lsa)
-                    orderTime = orderTime.add(timeOption.label, "hour");
+                if (timeOption.label === 1) {
+                    orderTime = orderTime.add(1, "hour");
                 } else {
-                    // minutlar
                     orderTime = orderTime.add(timeOption.label, "minute");
                 }
             }
@@ -76,39 +101,37 @@ const TimeSelectionModal = ({ visible, onClose, setTimeSelected }) => {
                 id: Date.now(),
                 clientId: user?._id,
                 date: dayjs().format("YYYY-MM-DD"),
-                time: formattedTime, // Bu yerda hisoblangan vaqt
+                time: formattedTime,
                 from: user.address,
                 to: "Manzil " + Math.floor(Math.random() * 100),
                 price: orderPrice,
                 cashback: orderCashback,
-                when: timeOption.value, // waiting yoki created
+                when: timeOption.value,
                 location: coords,
                 phoneId: user.phone,
+                carType: selectedCar, // 🔥 tanlangan mashina turi
             };
 
-            await createOrder(newOrder).unwrap();
+            const response = await createOrder(newOrder).unwrap();
 
-            const savedHistoryJson = await AsyncStorage.getItem("orderHistory");
-            const savedHistory = savedHistoryJson ? JSON.parse(savedHistoryJson) : [];
-            const updatedHistory = [newOrder, ...savedHistory];
-            await AsyncStorage.setItem("orderHistory", JSON.stringify(updatedHistory));
-            setTimeSelected(true);
-
-            const savedCashback = parseFloat(await AsyncStorage.getItem("cashback") || "0");
-            const newCashback = savedCashback + orderCashback;
-            await AsyncStorage.setItem("cashback", newCashback.toString());
-
-            showNotification(
-                "✅ Tasdiqlandi",
-                `Buyurtma qabul qilindi!\n+${orderCashback.toLocaleString()} so'm cashback olasiz!`
+            await AsyncStorage.setItem(
+                "activeOrderStatus",
+                JSON.stringify({
+                    status: true, order: response?.innerData
+                })
             );
 
-            setSelectedTime(null);
-            onClose();
+            dispatch(setActiveOrder(response?.innerData));
+            setTimeSelected(true);
+            Notification("Buyurtma muvaffaqiyatli yaratildi", "success");
+
         } catch (e) {
-            console.error("Buyurtma yuborishda xatolik:", e);
-            showNotification("Xatolik", "Buyurtma yuborishda xatolik yuz berdi!");
+            Notification(`Buyurtma yuborishda xatolik: ${e.message}`, "error");
             setSelectedTime(null);
+        } finally {
+            setSelectedTime(null);
+            dispatch(setOrderLoading(false)); // 🔥 loading = false
+            onClose();
         }
     };
 
@@ -116,8 +139,39 @@ const TimeSelectionModal = ({ visible, onClose, setTimeSelected }) => {
         <Modal animationType="slide" transparent visible={visible}>
             <View style={styles.modalContainer}>
                 <View style={styles.modalBox}>
-                    <Text style={styles.modalTitle}>Qachon taksi kelsin?</Text>
 
+                    <Text style={styles.modalTitle}>Taksi turi</Text>
+
+
+                    {/* 🔥 CAR TYPE SLIDER */}
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                    // style={{ marginTop: 15 }}
+                    >
+                        {carTypes.map((car, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                onPress={() => setSelectedCar(car.value)}
+                                style={[
+                                    styles.card,
+                                    selectedCar === car.value && styles.activeCard,
+                                ]}
+                            >
+                                <Image source={car.image} style={styles.image} />
+                                <Text
+                                    style={[
+                                        styles.label,
+                                        selectedCar === car.value && styles.activeLabel,
+                                    ]}
+                                >
+                                    {car.label}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                    <Text style={[styles.modalTitle, { marginTop: 10 }]}>Qachon taksi kelsin?</Text>
+                    {/* TIME BUTTONS */}
                     {timeOptions.map((t, i) => (
                         <Pressable
                             key={i}
@@ -132,19 +186,61 @@ const TimeSelectionModal = ({ visible, onClose, setTimeSelected }) => {
                                 <ActivityIndicator color="#fff" />
                             ) : (
                                 <Text style={styles.timeBtnText}>
-                                    {t.value === "created" && t.label >= 1 && t.label <= 6 ? `${t.label} soat` :
-                                        t.value === "created" ? `${t.label} minut` : t.label}
+                                    {t.value === "created" && t.label === 1
+                                        ? "1 soat"
+                                        : t.value === "created"
+                                            ? `${t.label} minut`
+                                            : t.label}
                                 </Text>
                             )}
                         </Pressable>
                     ))}
 
+                    {/* 🔥 Qo‘shimcha xizmatlar: faqat EKONOM bo'lsa ko'rinadi */}
+                    {selectedCar === "econom" && (
+                        <View style={styles.row}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.serviceBtn,
+                                    selectedService === "perimichka" && styles.activeService
+                                ]}
+                                onPress={() =>
+                                    setSelectedService(selectedService === "perimichka" ? null : "perimichka")
+                                }
+                            >
+                                <Text
+                                    style={[
+                                        styles.serviceLabel,
+                                        selectedService === "perimichka" && styles.activeLabel
+                                    ]}
+                                >
+                                    Perimichka
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[
+                                    styles.serviceBtn,
+                                    selectedService === "shatak" && styles.activeService
+                                ]}
+                                onPress={() =>
+                                    setSelectedService(selectedService === "shatak" ? null : "shatak")
+                                }
+                            >
+                                <Text
+                                    style={[
+                                        styles.serviceLabel,
+                                        selectedService === "shatak" && styles.activeLabel
+                                    ]}
+                                >
+                                    Shatak
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                    {/* CANCEL BUTTON */}
                     <Pressable
-                        style={[
-                            styles.timeBtn,
-                            styles.cancelBtn,
-                            selectedTime && { opacity: 0.6 }
-                        ]}
+                        style={[styles.timeBtn, styles.cancelBtn, selectedTime && { opacity: 0.6 }]}
                         onPress={onClose}
                         disabled={!!selectedTime}
                     >

@@ -1,12 +1,13 @@
 {
   "expo": {
     "name": "My Taxi",
-    "slug": "My Taxi",
+    "slug": "mytaxi-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/taxi.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "scheme": "mytaxi",
     "splash": {
       "image": "./src/assets/taxi.png",
       "resizeMode": "contain",

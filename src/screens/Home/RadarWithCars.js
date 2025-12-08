@@ -7,8 +7,12 @@ import {
     Text,
     ScrollView,
     TouchableOpacity,
+    ActivityIndicator,
 } from "react-native";
 import Svg, { Circle, Path, Defs, RadialGradient, Stop, G } from "react-native-svg";
+import { useAssignDriverMutation } from "../../context/orderApi";
+import CountdownHeader from "../../components/Countdown/CountdownHeader";
+import styles from "./styles/WithCars";
 
 const AnimatedG = Animated.createAnimatedComponent(G);
 const TAXI_COUNT = 3;
@@ -45,22 +49,16 @@ function getRandomPositionsInCircle(cx, cy, r, iconSize = ICON_SIZE) {
     return positions;
 }
 
-// Mock taxis (internal to component)
-const mockTaxis = [
-    { id: 1, name: "Cobalt", number: "01 A 777 AA", driver: "Azizbek Karimov", phone: 998915678899, color: "Oq", eta: 7 },
-    { id: 2, name: "Gentra", number: "01 B 456 BB", driver: "Doniyor Sattorov", phone: 998931234567, color: "Qora", eta: 5 },
-    { id: 3, name: "Damas", number: "01 C 999 CC", driver: "Otabek Xolmatov", phone: 998997070777, color: "Kumush", eta: 3 },
-];
 
-export default function RadarWithCars({ size = 340 }) {
+export default function RadarWithCars({ drivers, clientId, orderId, size = 340 }) {
     const spin = useRef(new Animated.Value(0)).current;
     const approachAnim = useRef(new Animated.Value(0)).current;
-
     const [positions, setPositions] = useState([]);
     const [selectedTaxi, setSelectedTaxi] = useState(null);
-    const [approachStart, setApproachStart] = useState(null);
-    const [approachPos, setApproachPos] = useState(null);
     const [countdown, setCountdown] = useState(0); // countdown in seconds
+    const [loadingIndex, setLoadingIndex] = useState(null);
+
+    const [assignDriver, { isLoading }] = useAssignDriverMutation();
 
     const cx = size / 2;
     const cy = size / 2;
@@ -71,7 +69,7 @@ export default function RadarWithCars({ size = 340 }) {
         setPositions(getRandomPositionsInCircle(cx, cy, r));
     }, []);
 
-    // Radar rotation
+
     useEffect(() => {
         Animated.loop(
             Animated.timing(spin, {
@@ -83,16 +81,6 @@ export default function RadarWithCars({ size = 340 }) {
         ).start();
     }, []);
 
-    // Taxi approach animation
-    useEffect(() => {
-        if (!approachStart) return;
-        const id = approachAnim.addListener(({ value }) => {
-            const x = approachStart.x + (cx - ICON_SIZE / 2 - approachStart.x) * value;
-            const y = approachStart.y + (cy - ICON_SIZE / 2 - approachStart.y) * value;
-            setApproachPos({ x, y });
-        });
-        return () => approachAnim.removeListener(id);
-    }, [approachStart]);
 
     // Countdown timer
     useEffect(() => {
@@ -104,20 +92,36 @@ export default function RadarWithCars({ size = 340 }) {
     }, [countdown]);
 
     // Handle taxi selection
-    function handleSelectTaxi(taxi, index) {
-        setSelectedTaxi(taxi);
-        const start = positions[index];
-        setApproachStart(start);
-        approachAnim.setValue(0);
+    async function handleSelectTaxi(taxi, index) {
+        setLoadingIndex(index);
+        try {
+            const res = await assignDriver({
+                orderId,
+                driverId: taxi.driverId._id,
+            }).unwrap();
 
-        Animated.timing(approachAnim, {
-            toValue: 1,
-            duration: taxi.eta * 60 * 1000, // ETA in minutes
-            easing: Easing.linear,
-            useNativeDriver: false,
-        }).start();
+            if (!res.state) {
+                setLoadingIndex(null);
+                return;
+            }
 
-        setCountdown(taxi.eta * 60); // set countdown in seconds
+            setSelectedTaxi(taxi);
+            const start = positions[index];
+            approachAnim.setValue(0);
+
+            Animated.timing(approachAnim, {
+                toValue: 1,
+                duration: taxi.eta * 60 * 1000, // ETA in minutes
+                easing: Easing.linear,
+                useNativeDriver: false,
+            }).start();
+
+            setCountdown(taxi.eta * 60); // set countdown in seconds 
+        } catch (error) {
+            console.error("Failed to assign driver:", error);
+        } finally {
+            setLoadingIndex(null); // tugagach loader o‘chadi
+        }
     }
 
     const rotate = spin.interpolate({
@@ -127,9 +131,9 @@ export default function RadarWithCars({ size = 340 }) {
     const beamPath = createSectorPath(cx, cy, r, -8, 8);
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={styles.container}>
             {/* Radar Screen */}
-            <View style={{ width: size, height: size, alignSelf: "center" }}>
+            <View style={[styles.radarWrapper, { width: size, height: size }]}>
                 <Svg width={size} height={size}>
                     <Defs>
                         <RadialGradient id="glow" cx="50%" cy="50%" r="50%">
@@ -142,9 +146,9 @@ export default function RadarWithCars({ size = 340 }) {
                     <Circle cx={cx} cy={cy} r={r} fill="#041017" />
                     <Circle cx={cx} cy={cy} r={r} fill="url(#glow)" />
 
-                    {[1, 2, 3, 4].map((i) => (
+                    {[1, 2, 3, 4].map((i, x) => (
                         <Circle
-                            key={i}
+                            key={x}
                             cx={cx}
                             cy={cy}
                             r={(r / 5) * i}
@@ -179,137 +183,62 @@ export default function RadarWithCars({ size = 340 }) {
                 </Svg>
 
                 {/* Taxis on radar (clickable) */}
-                {!selectedTaxi &&
-                    positions.map((pos, i) => (
-                        <TouchableOpacity
-                            key={i}
-                            style={{ position: "absolute", left: pos.x, top: pos.y }}
-                            onPress={() => handleSelectTaxi(mockTaxis[i], i)}
-                        >
-                            <Image
-                                source={require("../../assets/taxi.png")}
-                                style={{ width: ICON_SIZE, height: ICON_SIZE }}
-                            />
-                        </TouchableOpacity>
-                    ))}
-
-                {/* Taxi approaching user */}
-                {selectedTaxi && approachPos && (
-                    <Animated.View
-                        style={{
-                            position: "absolute",
-                            left: approachPos.x,
-                            top: approachPos.y,
-                        }}
+                {positions.map((pos, i) => (
+                    <TouchableOpacity
+                        key={i}
+                        style={[styles.taxiIcon, { left: pos.x, top: pos.y }]}
+                        onPress={() => handleSelectTaxi(drivers[i], i)}
                     >
                         <Image
                             source={require("../../assets/taxi.png")}
-                            style={{ width: ICON_SIZE + 12, height: ICON_SIZE + 12 }}
+                            style={styles.taxiIcon}
                         />
-                    </Animated.View>
-                )}
+                    </TouchableOpacity>
+                ))}
+
+                <CountdownHeader
+                    driversLength={drivers?.length}
+                    countdown={countdown}
+                    selectedTaxi={selectedTaxi}
+                />
             </View>
 
-            {/* Countdown + Taxi Info */}
-            {selectedTaxi && (
-                <View
-                    style={{
-                        marginTop: 20,
-                        width: "90%",
-                        alignSelf: "center",
-                        backgroundColor: "#041017",
-                        padding: 15,
-                        borderWidth: 1,
-                        borderColor: "#00ff7f33",
-                        borderRadius: 14,
-                        alignItems: "center",
-                    }}
-                >
-                    <Text style={{ color: "#00ff7f", fontSize: 20, fontWeight: "700" }}>
-                        {selectedTaxi.name} — {selectedTaxi.number}
-                    </Text>
-                    <Text style={{ color: "white", marginTop: 2 }}>
-                        Rangi: {selectedTaxi.color}
-                    </Text>
-                    <Text style={{ color: "white", marginTop: 6 }}>
-                        Haydovchi: {selectedTaxi.driver}
-                    </Text>
-                    <Text style={{ color: "white", marginTop: 2 }}>
-                        Telefon: +{selectedTaxi.phone}
-                    </Text>
-                    <Text
-                        style={{
-                            color: "#00ff7f",
-                            marginTop: 10,
-                            fontSize: 18,
-                            fontWeight: "800",
-                        }}
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+                {drivers?.map((taxi, index) => (
+                    <TouchableOpacity
+                        key={taxi.id}
+                        onPress={() => handleSelectTaxi(taxi, index)}
+                        disabled={loadingIndex === index}
                     >
-                        {Math.floor(countdown / 60)} min {countdown % 60} s da yetib keladi...
-                    </Text>
-                </View>
-            )}
+                        <View style={[styles.taxiCard, loadingIndex === index && styles.taxiCardLoading]}>
+                            <Image
+                                source={require("../../assets/taxi.png")}
+                                style={styles.taxiImage}
+                            />
 
-            {/* Taxi list (if not selected) */}
-            {!selectedTaxi && (
-                <ScrollView
-                    style={{
-                        width: "90%",
-                        alignSelf: "center",
-                        maxHeight: 400,
-                    }}
-                    contentContainerStyle={{ paddingBottom: 10 }} // scroll uchun ichki padding
-                >
-                    {mockTaxis.map((taxi, index) => (
-                        <TouchableOpacity
-                            key={taxi.id}
-                            onPress={() => handleSelectTaxi(taxi, index)}
-                        >
-                            <View
-                                style={{
-                                    backgroundColor: "#041017",
-                                    padding: 12,
-                                    paddingBottom: 8,
-                                    paddingTop: 8,
-                                    borderRadius: 12,
-                                    marginBottom: 6,
-                                    borderWidth: 1,
-                                    borderColor: "#00ff7f33",
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                }}
-                            >
-                                <Image
-                                    source={require("../../assets/taxi.png")}
-                                    style={{ width: 38, height: 38, marginRight: 12 }}
-                                />
-                                <View style={{ flex: 1 }}>
-                                    <Text
-                                        style={{
-                                            color: "#00ff7f",
-                                            fontSize: 16,
-                                            fontWeight: "700",
-                                        }}
-                                    >
-                                        {taxi.name} — {taxi.number}
-                                    </Text>
-                                    <Text style={{ color: "white", opacity: 0.85, marginTop: 2 }}>
-                                        Haydovchi: {taxi.driver}
-                                    </Text>
-                                    <Text style={{ color: "white", opacity: 0.85, marginTop: 2 }}>
-                                        Rangi: {taxi.color}
-                                    </Text>
-                                </View>
-                                <Text
-                                    style={{ color: "#00ff7f", fontSize: 18, fontWeight: "800" }}
-                                >
-                                    {taxi.eta} min
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.taxiName}>
+                                    {taxi?.driverId?.car?.make} {taxi?.driverId?.car?.modelName}
+                                    <Text style={styles.taxiColor}>
+                                        {taxi?.driverId?.car?.color}
+                                    </Text> - {taxi?.driverId?.car?.plateNumber}
+                                </Text>
+
+                                <Text style={styles.driverName}>
+                                    Shafyor: {taxi?.driverId?.firstName} {taxi?.driverId?.lastName}
                                 </Text>
                             </View>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
-            )}
+
+                            {loadingIndex === index ? (
+                                <ActivityIndicator size="small" color="#00ff7f" />
+                            ) : (
+                                <Text style={styles.etaText}>{taxi.eta} min</Text>
+                            )}
+                        </View>
+                    </TouchableOpacity>
+                ))}
+            </ScrollView>
         </View>
+
     );
 }

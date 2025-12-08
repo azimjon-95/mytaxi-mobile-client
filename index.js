@@ -1,4 +1,14 @@
 import { registerRootComponent } from 'expo';
-import App from './src/App';
+import { Provider } from "react-redux";
+import { store } from "./src/context/store";
+import App from "./App";
 
-registerRootComponent(App);
+function Index() {
+    return (
+        <Provider store={store}>
+            <App />
+        </Provider>
+    );
+}
+
+registerRootComponent(Index);

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from "react-native";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./styles";
 import { useSaveUserMutation } from "../../context/clientApi";
+import { Notification } from "../../components/Notification";
 
 export default function UserInfoScreen({ navigation, route }) {
     const { phone } = route.params;
@@ -16,25 +18,25 @@ export default function UserInfoScreen({ navigation, route }) {
 
     const saveData = async () => {
         if (!name || !surname || !age || !address) {
-            return Alert.alert("Xatolik", "Hammasi majburiy!");
+            return Notification("Xatolik", "Hammasi majburiy!", "error");
         }
 
         const user = { phone, name, surname, age, address };
 
         try {
             // Serverga yuborish
+            // const response = await saveUser(user).unwrap();
             const response = await saveUser(user).unwrap();
 
             // AsyncStorage ga saqlash
             await AsyncStorage.setItem("userData", JSON.stringify(response?.innerData));
 
-            // Keyingi ekranga o'tish
-            navigation.reset({
-                index: 0,
-                routes: [{ name: "Pin" }],
-            });
+            if (response?.state === true) {
+                Notification("Muvaffaqiyatli saqlandi", "success");
+                navigation.navigate("Verify", { phone });
+            }
         } catch (error) {
-            Alert.alert("Xatolik", error?.data?.message || "Serverga ulanishda xatolik yuz berdi");
+            Notification("Xatolik", error?.data?.message, "error");
         }
     };
 
@@ -153,3 +155,30 @@ export default function UserInfoScreen({ navigation, route }) {
         </ScrollView>
     );
 }
+// const saveData = async () => {
+//     if (!name || !surname || !age || !address) {
+//         return Notification("Xatolik", "Hammasi majburiy!", "error");
+//     }
+
+//     const user = { phone, name, surname, age, address };
+
+//     try {
+
+//         // console.log(user);
+//         const response = await axios.post(
+//             "http://192.168.1.102:5000/api/v1/client",
+//             user,
+
+//         )
+
+//         // AsyncStorage ga saqlash
+//         await AsyncStorage.setItem("userData", JSON.stringify(response?.innerData));
+
+//         if (response?.state === true) {
+//             Notification("Muvaffaqiyatli saqlandi", "success");
+//             navigation.navigate("Verify", { phone });
+//         }
+//     } catch (error) {
+//         Notification("Xatolik", error?.data?.message, "error");
+//     }
+// };

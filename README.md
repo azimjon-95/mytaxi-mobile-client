@@ -69,7 +69,6 @@ EXPO_PUBLIC_SOCKET_URL=ws://your-socket-url
   "@react-navigation/native-stack": "^7.8.3",
   "@reduxjs/toolkit": "^2.11.0",
   "expo-location": "~19.0.7",
-  "expo-notifications": "~0.32.13",
   "react-redux": "^9.2.0"
 }
 

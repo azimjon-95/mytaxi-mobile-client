@@ -54,13 +54,13 @@ export const orderApi = api.injectEndpoints({
         }),
 
         // =================== DRIVER SELECT ORDER ===================
-        selectDriver: builder.mutation({
-            query: (data) => ({
-                url: "/orders/select-driver",
-                method: "POST",
-                body: data,
-            }),
-        }),
+        // selectDriver: builder.mutation({
+        //     query: (data) => ({
+        //         url: "/orders/select-driver",
+        //         method: "POST",
+        //         body: data,
+        //     }),
+        // }),
 
         // =================== CLIENT ASSIGNS DRIVER ===================
         assignDriverByClient: builder.mutation({
@@ -108,6 +108,23 @@ export const orderApi = api.injectEndpoints({
 
             }),
         }),
+
+        //"/orders/drivers/:clientId/:orderId",
+        getAvailableDrivers: builder.query({
+            query: ({ clientId: clId, orderId: orId }) => ({
+                url: `/orders/drivers/${clId}/${orId}`,
+                method: "GET",
+            }),
+        }),
+
+        //post("/orders/select-driver", orderCtrl.selectDriver);
+        assignDriver: builder.mutation({
+            query: ({ orderId, driverId }) => ({
+                url: "/orders/select-driver",
+                method: "POST",
+                body: { orderId, driverId },
+            }),
+        }),
     }),
 });
 
@@ -125,4 +142,6 @@ export const {
     useUpdateMeterMutation,
     useCompleteOrderMutation,
     useWatchActiveOrderQuery,
+    useGetAvailableDriversQuery,
+    useAssignDriverMutation
 } = orderApi;

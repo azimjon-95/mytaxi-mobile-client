@@ -3,7 +3,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Bazaviy query – token bilan headers tayyorlash
 const rawBaseQuery = fetchBaseQuery({
-    baseUrl: "http://localhost:5050/api/v1", // backend manzilingiz
+    // http://192.168.1.5:8082/api
+    baseUrl: "http://192.168.1.102:5000/api/v1", // backend manzilingiz
     prepareHeaders: async (headers) => {
         let token = await AsyncStorage.getItem("token");
         if (token) {
