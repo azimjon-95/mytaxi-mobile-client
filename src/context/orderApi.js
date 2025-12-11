@@ -136,7 +136,7 @@ export const {
     useUpdateOrderMutation,
     useCancelOrderMutation,
     useDeleteOrderMutation,
-    useSelectDriverMutation,
+    // useSelectDriverMutation,
     useAssignDriverByClientMutation,
     useStartMeterMutation,
     useUpdateMeterMutation,

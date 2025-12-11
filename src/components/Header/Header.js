@@ -22,7 +22,7 @@ export default function Header({ hasDriver, onHamburgerPress, cashback, setHasDr
 
     // hasDriver "main" bo'lsa, barcha tugmalarni yashirish
     // if (hasDriver === "main" || hasDriver === "availableDrivers") {
-    if (hasDriver === "main" || hasDriver === "availableDrivers" || hasDriver === "drivers") {
+    if (hasDriver === "main" || hasDriver === "availableDrivers" || hasDriver === "driver") {
         return (
             <View style={styles.header}>
                 <TouchableOpacity
@@ -43,7 +43,7 @@ export default function Header({ hasDriver, onHamburgerPress, cashback, setHasDr
     }
 
     // Agar navigat null bo'lsa, elementlar ko'rinmas
-    const showBackButton = navigat === "refresh" && hasDriver === "drivers";
+    const showBackButton = navigat === "refresh" && hasDriver === "driver";
     const showTaxiButton = navigat === null;
 
     return (

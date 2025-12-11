@@ -25,73 +25,72 @@ export default function Main() {
   const [drivers, setDrivers] = useState(null);
   const [hasDriver, setHasDriver] = useState("main");
   const [timeSelected, setTimeSelected] = useState(false);
-  const { data: apiData, isLoading } = useGetAvailableDriversQuery(
-    { clientId, orderId: orderData }
-  );
 
-
-  // =======================================
-  // Load user & order data
   useEffect(() => {
 
     const loadSaved = async () => {
       try {
         const value = JSON.parse(await AsyncStorage.getItem("activeOrderStatus"));
         const clientData = JSON.parse(await AsyncStorage.getItem("userData"));
-        if (value?.order?._id) setOrderData(value.order._id);
-        if (clientData?._id) setClientId(clientData._id);
+        if (value) setOrderData(value?.order._id);
+        if (clientData) setClientId(clientData?._id);
       } catch (e) {
         Notification(`Ma'lumotlarni yuklashda xatolik: ${e}`, "error");
+
       }
     };
 
     loadSaved();
   }, []);
+  const { data: apiData, isLoading, refetch } = useGetAvailableDriversQuery(
+    {
+      clientId: clientId,
+      orderId: orderData,
+    },
+  );
 
-  // =======================================
-  useEffect(() => {
-    const innerData = apiData?.innerData;
-    if (!innerData) return;
 
-    if (innerData.status === "availableDrivers") {
-      setAvailableDrivers(innerData.availableDrivers || []);
-      setDrivers(null);
-      setHasDriver("availableDrivers");
-    } else if (innerData.status === "driver") {
-      setDrivers(innerData.driver || null);
-      setAvailableDrivers(innerData.availableDrivers || []);
-      setHasDriver("drivers");
-    } else {
+  // 🔥 1. Statusni boshqaradigan umumiy handler
+  const handleStatusUpdate = async (data) => {
+    const status = data?.status;
+    if (status === "main") {
+      await AsyncStorage.removeItem("activeOrderStatus");
       setAvailableDrivers([]);
       setDrivers(null);
       setHasDriver("main");
       setTimeSelected(false);
+      return
     }
-  }, [apiData]);
-  // Soket bilan real-time update
+    else if (status === "availableDrivers") {
+      setAvailableDrivers(data.availableDrivers || []);
+      setDrivers(null);
+      setHasDriver("availableDrivers");
+      return
+    }
+    else if (status === "driver") {
+      setDrivers(data.driver || null);
+      setAvailableDrivers(data.availableDrivers || []);
+      setHasDriver(status);
+      return
+    }
+    // else {
+    //   setAvailableDrivers([]);
+    //   setDrivers(null);
+    //   setHasDriver("main");
+    //   setTimeSelected(false);
+    // }
+  };
   useEffect(() => {
-    const handler = (data) => {
-      if (!data) return;
+    const innerData = apiData?.innerData;
+    handleStatusUpdate(innerData);
+  }, [apiData]);
 
-      if (data.status === "availableDrivers") {
-        setAvailableDrivers(data.availableDrivers || []);
-        setDrivers(null);
-        setHasDriver("availableDrivers");
-      } else if (data.status === "driver") {
-        setDrivers(data.driver || null);
-        setAvailableDrivers(data.availableDrivers || []);
-        setHasDriver("drivers");
-      } else {
-        setDrivers(null);
-        setAvailableDrivers([]);
-        setHasDriver("main");
-        setTimeSelected(false);
-      }
-    };
-
-    socket.on("availableDriversUpdate", handler);
-    return () => socket.off("availableDriversUpdate", handler);
-  }, []);
+  useEffect(() => {
+    socket.on("availableDriversUpdate", () => {
+      refetch();
+    });
+    return () => socket.off("availableDriversUpdate");
+  }, [refetch]);
 
 
   if (isLoading) {
@@ -117,11 +116,12 @@ export default function Main() {
         }}>
           {/* HEADER & SIDEBAR */}
           <Header
+
             onHamburgerPress={(page) => {
               setSidebarVisible(true);
 
-              if (page === "drivers") {
-                setHasDriver("drivers");
+              if (page === "driver") {
+                setHasDriver("driver");
 
                 // Agar drivers null bo'lsa, bo'sh object beramiz
                 if (!drivers) {
@@ -132,7 +132,7 @@ export default function Main() {
             hasDriver={hasDriver}
             setHasDriver={setHasDriver}
             cashback={cashback}
-            showBackButton={hasDriver === "drivers"}
+            showBackButton={hasDriver === "driver"}
             onBackPress={() => setHasDriver("main")}
           />
           <Sidebar visible={sidebarVisible} onClose={() => setSidebarVisible(false)} />
@@ -141,7 +141,7 @@ export default function Main() {
           {(() => {
             switch (hasDriver) {
               case "main":
-                return <HomeScreen />;
+                return <HomeScreen setHasDriver={setHasDriver} />;
               case "availableDrivers":
                 return (
                   <RadarWithCars
@@ -150,9 +150,10 @@ export default function Main() {
                     orderId={orderData}
                     size={350}
                     visible={timeSelected}
+                    setHasDriver={setHasDriver}
                   />
                 );
-              case "drivers":
+              case "driver":
                 return (
                   <ActiveTaxiTracker
                     drivers={drivers}

@@ -42,7 +42,7 @@ const carTypes = [
     },
 ];
 
-const TimeSelectionModal = ({ visible, onClose, setTimeSelected }) => {
+const TimeSelectionModal = ({ visible, onClose, setTimeSelected, setHasDriver }) => {
     const dispatch = useDispatch();
     const timeOptions = [
         { label: "Chaqirish", value: "waiting" },
@@ -109,11 +109,13 @@ const TimeSelectionModal = ({ visible, onClose, setTimeSelected }) => {
                 when: timeOption.value,
                 location: coords,
                 phoneId: user.phone,
-                carType: selectedCar, // 🔥 tanlangan mashina turi
+                carType: selectedCar,
+                service: selectedService
             };
 
             const response = await createOrder(newOrder).unwrap();
-
+            console.log(response);
+            setHasDriver("availableDrivers");
             await AsyncStorage.setItem(
                 "activeOrderStatus",
                 JSON.stringify({
@@ -126,7 +128,7 @@ const TimeSelectionModal = ({ visible, onClose, setTimeSelected }) => {
             Notification("Buyurtma muvaffaqiyatli yaratildi", "success");
 
         } catch (e) {
-            Notification(`Buyurtma yuborishda xatolik: ${e.message}`, "error");
+            Notification(`Buyurtma yuborishda xatolik: ${e?.data.message}`, "error");
             setSelectedTime(null);
         } finally {
             setSelectedTime(null);

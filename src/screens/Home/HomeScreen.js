@@ -8,7 +8,7 @@ import TimeSelectionModal from "./TimeSelectionModal";
 import { Notification } from "../../components/Notification";
 import styles from "./styles/Home";
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({ navigation, setHasDriver }) {
     const [modalVisible, setModalVisible] = useState(false);
 
 
@@ -75,6 +75,7 @@ export default function HomeScreen({ navigation }) {
             {/* TIME MODAL */}
             <TimeSelectionModal
                 visible={modalVisible}
+                setHasDriver={setHasDriver}
                 onClose={() => setModalVisible(false)}
             />
 

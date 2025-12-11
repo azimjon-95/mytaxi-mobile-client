@@ -50,7 +50,7 @@ function getRandomPositionsInCircle(cx, cy, r, iconSize = ICON_SIZE) {
 }
 
 
-export default function RadarWithCars({ drivers, clientId, orderId, size = 340 }) {
+export default function RadarWithCars({ drivers, clientId, setHasDriver, orderId, size = 340 }) {
     const spin = useRef(new Animated.Value(0)).current;
     const approachAnim = useRef(new Animated.Value(0)).current;
     const [positions, setPositions] = useState([]);
@@ -93,20 +93,26 @@ export default function RadarWithCars({ drivers, clientId, orderId, size = 340 }
 
     // Handle taxi selection
     async function handleSelectTaxi(taxi, index) {
+        console.log("OK >>>", {
+            orderId,
+            taxi
+        });
         setLoadingIndex(index);
         try {
+            // return
             const res = await assignDriver({
                 orderId,
                 driverId: taxi.driverId._id,
             }).unwrap();
+            console.log(res);
 
-            if (!res.state) {
+            setHasDriver("driver");
+            if (!res) {
                 setLoadingIndex(null);
                 return;
             }
 
             setSelectedTaxi(taxi);
-            const start = positions[index];
             approachAnim.setValue(0);
 
             Animated.timing(approachAnim, {
@@ -187,7 +193,6 @@ export default function RadarWithCars({ drivers, clientId, orderId, size = 340 }
                     <TouchableOpacity
                         key={i}
                         style={[styles.taxiIcon, { left: pos.x, top: pos.y }]}
-                        onPress={() => handleSelectTaxi(drivers[i], i)}
                     >
                         <Image
                             source={require("../../assets/taxi.png")}
@@ -206,7 +211,7 @@ export default function RadarWithCars({ drivers, clientId, orderId, size = 340 }
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
                 {drivers?.map((taxi, index) => (
                     <TouchableOpacity
-                        key={taxi.id}
+                        key={index}
                         onPress={() => handleSelectTaxi(taxi, index)}
                         disabled={loadingIndex === index}
                     >
