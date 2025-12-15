@@ -4,7 +4,7 @@ import { TouchableOpacity, Text, StyleSheet } from "react-native";
 export default function CustomButton({
     title,
     onPress,
-    bg = "#FFC400",
+    bg = "rgb(0, 255, 127)",
     color = "#000",
     full = false,
     style = {},

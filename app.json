@@ -1,17 +1,17 @@
 {
   "expo": {
-    "name": "My Taxi",
-    "slug": "mytaxi-app",
+    "name": "Go Taxi",
+    "slug": "gotaxi-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/taxi.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "scheme": "mytaxi",
+    "scheme": "gotaxi",
     "splash": {
       "image": "./src/assets/taxi.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#00ff7f"
     },
     "ios": {
       "supportsTablet": true
@@ -22,15 +22,16 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.mytaxiapp"
+      "package": "com.anonymous.gotaxiapp"
     },
     "web": {
       "favicon": "./src/assets/taxi.png"
     },
     "extra": {
       "eas": {
-        "projectId": "3e72e770-9146-4a08-8708-6dfae3fc12e6"
+        "projectId": "d8f254dc-94b9-4144-98a0-f181b8c1b8d8"
       }
-    }
+    },
+    "owner": "azimjon95m"
   }
 }

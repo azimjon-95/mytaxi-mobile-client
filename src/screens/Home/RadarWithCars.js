@@ -9,6 +9,7 @@ import {
     TouchableOpacity,
     ActivityIndicator,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Svg, { Circle, Path, Defs, RadialGradient, Stop, G } from "react-native-svg";
 import { useAssignDriverMutation } from "../../context/orderApi";
 import CountdownHeader from "../../components/Countdown/CountdownHeader";
@@ -93,10 +94,7 @@ export default function RadarWithCars({ drivers, clientId, setHasDriver, orderId
 
     // Handle taxi selection
     async function handleSelectTaxi(taxi, index) {
-        console.log("OK >>>", {
-            orderId,
-            taxi
-        });
+
         setLoadingIndex(index);
         try {
             // return
@@ -104,7 +102,6 @@ export default function RadarWithCars({ drivers, clientId, setHasDriver, orderId
                 orderId,
                 driverId: taxi.driverId._id,
             }).unwrap();
-            console.log(res);
 
             setHasDriver("driver");
             if (!res) {
@@ -115,6 +112,7 @@ export default function RadarWithCars({ drivers, clientId, setHasDriver, orderId
             setSelectedTaxi(taxi);
             approachAnim.setValue(0);
 
+            await AsyncStorage.setItem("panding", "true");
             Animated.timing(approachAnim, {
                 toValue: 1,
                 duration: taxi.eta * 60 * 1000, // ETA in minutes
@@ -195,7 +193,7 @@ export default function RadarWithCars({ drivers, clientId, setHasDriver, orderId
                         style={[styles.taxiIcon, { left: pos.x, top: pos.y }]}
                     >
                         <Image
-                            source={require("../../assets/taxi.png")}
+                            source={require("../../assets/car.png")}
                             style={styles.taxiIcon}
                         />
                     </TouchableOpacity>
@@ -205,6 +203,7 @@ export default function RadarWithCars({ drivers, clientId, setHasDriver, orderId
                     driversLength={drivers?.length}
                     countdown={countdown}
                     selectedTaxi={selectedTaxi}
+                    orderId={orderId}
                 />
             </View>
 
@@ -217,16 +216,17 @@ export default function RadarWithCars({ drivers, clientId, setHasDriver, orderId
                     >
                         <View style={[styles.taxiCard, loadingIndex === index && styles.taxiCardLoading]}>
                             <Image
-                                source={require("../../assets/taxi.png")}
+                                source={require("../../assets/car.png")}
                                 style={styles.taxiImage}
                             />
 
                             <View style={{ flex: 1 }}>
                                 <Text style={styles.taxiName}>
-                                    {taxi?.driverId?.car?.make} {taxi?.driverId?.car?.modelName}
+                                    {/* {taxi?.driverId?.car?.make} {taxi?.driverId?.car?.modelName} */}
+                                    {taxi?.driverId?.car?.plateNumber}  -
                                     <Text style={styles.taxiColor}>
                                         {taxi?.driverId?.car?.color}
-                                    </Text> - {taxi?.driverId?.car?.plateNumber}
+                                    </Text>
                                 </Text>
 
                                 <Text style={styles.driverName}>
@@ -237,7 +237,15 @@ export default function RadarWithCars({ drivers, clientId, setHasDriver, orderId
                             {loadingIndex === index ? (
                                 <ActivityIndicator size="small" color="#00ff7f" />
                             ) : (
-                                <Text style={styles.etaText}>{taxi.eta} min</Text>
+                                <View>
+                                    <Text style={styles.etaText}>
+                                        {taxi.distance < 1
+                                            ? `${Math.round(taxi.distance * 1000)} m`
+                                            : `${taxi.distance} km`}
+                                    </Text>
+                                    <Text style={styles.etaText}>{taxi.eta} min</Text>
+                                </View>
+
                             )}
                         </View>
                     </TouchableOpacity>

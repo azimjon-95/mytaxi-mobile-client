@@ -19,25 +19,34 @@ const rawBaseQuery = fetchBaseQuery({
 
 // Custom wrapper – xatolarni ushlash
 const baseQuery = async (args, api, extraOptions) => {
-    const result = await rawBaseQuery(args, api, extraOptions);
+    try {
+        const result = await rawBaseQuery(args, api, extraOptions);
 
-    // Backend xatolarini tekshirish
-    if (result?.error?.data?.message) {
-        const msg = result.error.data.message;
+        // Token tekshirish
+        if (result?.error?.data?.message) {
+            const msg = result.error.data.message;
 
-        if (msg === "invalid signature" || msg === "jwt expired") {
-            localStorage.clear();
-            window.location.href = "/login";
+            if (msg === "invalid signature" || msg === "jwt expired") {
+                await AsyncStorage.clear();
+            }
         }
-    }
 
-    return result;
+        return result;
+    } catch (error) {
+        // React Native ichida DOMException bo‘lsa shu yerga tushadi
+        return {
+            error: {
+                status: "CUSTOM_ERROR",
+                data: { message: error.message || "Unknown error" },
+            },
+        };
+    }
 };
 
-// RTK Query API yaratish
+
 export const api = createApi({
     reducerPath: "splitApi",
     baseQuery,
-    tagTypes: ["Orders"], // kerak bo'lsa taglar qo'shish mumkin
+    tagTypes: ["Orders"],
     endpoints: () => ({}),
 });

@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     },
     hamburgerLine: {
         height: 3,
-        backgroundColor: "#fefefe",
+        backgroundColor: "#00ff7f",
         borderRadius: 2,
     },
     backBtn: {
@@ -41,12 +41,15 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
     cashbackBadge: {
-        backgroundColor: "#f2f2f2",
+        borderColor: "#00ff7f",
+        borderWidth: 1,
         paddingHorizontal: 10,
         paddingVertical: 5,
+        color: "#00ff7f",
         borderRadius: 12,
     },
     cashbackText: {
+        color: "#00ff7f",
         fontSize: 14,
         fontWeight: "600",
     },

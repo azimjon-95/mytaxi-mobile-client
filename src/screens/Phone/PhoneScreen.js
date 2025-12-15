@@ -45,7 +45,7 @@ export default function PhoneScreen({ navigation }) {
                     style={[styles.input, isFocused && { borderWidth: 0 }]}
                     keyboardType="phone-pad"
                     placeholder="90 123 45 67"
-                    placeholderTextColor="rgba(255,194,0,0.4)"
+                    placeholderTextColor="#00ff8097"
                     value={phone}
                     onChangeText={setPhone}
                     maxLength={9} // faqat oxirgi 9 ta raqam

@@ -12,7 +12,7 @@ export default StyleSheet.create({
         height: "100%",
         backgroundColor: "#101820",
         borderRightWidth: 1,
-        borderRightColor: "#FFC400",
+        borderRightColor: "rgb(0, 255, 127)",
     },
     userSection: {
         padding: 20,
@@ -25,7 +25,7 @@ export default StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: "#FFC400",
+        backgroundColor: "rgb(0, 255, 127)",
         alignItems: "center",
         justifyContent: "center",
         marginBottom: 12,
@@ -38,12 +38,12 @@ export default StyleSheet.create({
     userName: {
         fontSize: 20,
         fontWeight: "bold",
-        color: "#FFC400",
+        color: "rgb(0, 255, 127)",
         marginBottom: 4,
     },
     userPhone: {
         fontSize: 14,
-        color: "rgba(255,196,0,0.7)",
+        color: "rgba(255, 255, 255, 0.7)",
     },
     menuItem: {
         flexDirection: "row",
@@ -60,12 +60,12 @@ export default StyleSheet.create({
     },
     menuText: {
         fontSize: 16,
-        color: "#FFC400",
+        color: "rgb(0, 255, 127)",
         fontWeight: "600",
     },
     cashbackAmount: {
         fontSize: 14,
-        color: "rgba(255,196,0,0.7)",
+        color: "rgba(255, 255, 255, 0.7)",
         marginTop: 2,
     },
     historySection: {
@@ -76,7 +76,7 @@ export default StyleSheet.create({
     historyTitle: {
         fontSize: 16,
         fontWeight: "bold",
-        color: "#FFC400",
+        color: "rgb(0, 255, 127)",
         marginBottom: 12,
     },
     historyCard: {
@@ -94,22 +94,22 @@ export default StyleSheet.create({
     },
     historyDate: {
         fontSize: 12,
-        color: "rgba(255,196,0,0.6)",
+        color: "rgba(255, 255, 255, 0.6)",
     },
     historyCashback: {
         fontSize: 12,
-        color: "#FFC400",
+        color: "rgb(0, 255, 127)",
         fontWeight: "bold",
     },
     historyRoute: {
         fontSize: 14,
-        color: "#FFC400",
+        color: "rgb(0, 255, 127)",
         marginBottom: 4,
     },
     historyPrice: {
         fontSize: 16,
         fontWeight: "bold",
-        color: "#FFC400",
+        color: "rgb(0, 255, 127)",
     },
     logoutItem: {
         borderBottomWidth: 0,

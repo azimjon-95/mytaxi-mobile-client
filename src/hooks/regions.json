@@ -1,0 +1,380 @@
+{
+    "quarters": [
+        {
+            "id": 1,
+            "name": "A.Kaxxor MFY"
+        },
+        {
+            "id": 2,
+            "name": "A.Navoyi MFY"
+        },
+        {
+            "id": 3,
+            "name": "Birlashgan MFY"
+        },
+        {
+            "id": 4,
+            "name": "Bog kucha MFY"
+        },
+        {
+            "id": 5,
+            "name": "Bog MFY"
+        },
+        {
+            "id": 6,
+            "name": "Buchiyon MFY"
+        },
+        {
+            "id": 7,
+            "name": "Chartok MFY"
+        },
+        {
+            "id": 8,
+            "name": "Chiganok MFY"
+        },
+        {
+            "id": 9,
+            "name": "Chinor MFY"
+        },
+        {
+            "id": 10,
+            "name": "Chodak boshi MFY"
+        },
+        {
+            "id": 11,
+            "name": "Chodak QFY"
+        },
+        {
+            "id": 12,
+            "name": "Chorkesar MFY"
+        },
+        {
+            "id": 13,
+            "name": "Chorkesar SHFY"
+        },
+        {
+            "id": 14,
+            "name": "Do`stlik MFY (1)"
+        },
+        {
+            "id": 15,
+            "name": "Do`stlik MFY (2)"
+        },
+        {
+            "id": 16,
+            "name": "Eski qishloq MFY"
+        },
+        {
+            "id": 17,
+            "name": "Guliston MFY"
+        },
+        {
+            "id": 18,
+            "name": "G`urumsaroy MFY"
+        },
+        {
+            "id": 19,
+            "name": "Guzar MFY"
+        },
+        {
+            "id": 20,
+            "name": "Imom ota MFY"
+        },
+        {
+            "id": 21,
+            "name": "Iskovut MFY"
+        },
+        {
+            "id": 22,
+            "name": "Ittifoq MFY"
+        },
+        {
+            "id": 23,
+            "name": "Kenagas MFY"
+        },
+        {
+            "id": 24,
+            "name": "Kalqurbon MFY"
+        },
+        {
+            "id": 25,
+            "name": "Kandig`on MFY"
+        },
+        {
+            "id": 26,
+            "name": "Qushminor MFY"
+        },
+        {
+            "id": 27,
+            "name": "Qushtepa MFY"
+        },
+        {
+            "id": 28,
+            "name": "M.Toshmatov QFY"
+        },
+        {
+            "id": 29,
+            "name": "M.Umurzaqov QFY"
+        },
+        {
+            "id": 30,
+            "name": "Madaniyat MFY"
+        },
+        {
+            "id": 31,
+            "name": "Madanyat QFY"
+        },
+        {
+            "id": 32,
+            "name": "Margizor-1 MFY"
+        },
+        {
+            "id": 33,
+            "name": "Margizor-2 MFY"
+        },
+        {
+            "id": 34,
+            "name": "Mayda millat MFY"
+        },
+        {
+            "id": 35,
+            "name": "Maydon MFY"
+        },
+        {
+            "id": 36,
+            "name": "Mozor MFY"
+        },
+        {
+            "id": 37,
+            "name": "Muqimiy MFY"
+        },
+        {
+            "id": 38,
+            "name": "Navbaxor SHFY"
+        },
+        {
+            "id": 39,
+            "name": "Navboxor MFY"
+        },
+        {
+            "id": 40,
+            "name": "Navruz MFY"
+        },
+        {
+            "id": 41,
+            "name": "Nayman MFY"
+        },
+        {
+            "id": 42,
+            "name": "Nayman QFY"
+        },
+        {
+            "id": 43,
+            "name": "Olmozor MFY"
+        },
+        {
+            "id": 44,
+            "name": "Oltinkon SHFY"
+        },
+        {
+            "id": 45,
+            "name": "Oybek MFY"
+        },
+        {
+            "id": 46,
+            "name": "Paxtakor MFY"
+        },
+        {
+            "id": 47,
+            "name": "Paxtaobod QFY"
+        },
+        {
+            "id": 48,
+            "name": "Pillakash MFY"
+        },
+        {
+            "id": 49,
+            "name": "Pilol MFY"
+        },
+        {
+            "id": 50,
+            "name": "Pop MFY"
+        },
+        {
+            "id": 51,
+            "name": "Pop QFY"
+        },
+        {
+            "id": 52,
+            "name": "Pungon QFY"
+        },
+        {
+            "id": 53,
+            "name": "S.Ergashev MFY"
+        },
+        {
+            "id": 54,
+            "name": "S.Raximov MFY"
+        },
+        {
+            "id": 55,
+            "name": "Shayxon MFY"
+        },
+        {
+            "id": 56,
+            "name": "Shomozor MFY"
+        },
+        {
+            "id": 57,
+            "name": "Soxibkor MFY"
+        },
+        {
+            "id": 58,
+            "name": "Temir yo`l usti. MFY"
+        },
+        {
+            "id": 59,
+            "name": "Tepaqurg`on MFY"
+        },
+        {
+            "id": 60,
+            "name": "Tinchlik MFY"
+        },
+        {
+            "id": 61,
+            "name": "Toshqurg`on MFY"
+        },
+        {
+            "id": 62,
+            "name": "Tuman-1 MFY"
+        },
+        {
+            "id": 63,
+            "name": "U.Ikromov MFY"
+        },
+        {
+            "id": 64,
+            "name": "uch uyli MFY"
+        },
+        {
+            "id": 65,
+            "name": "Ultarma MFY"
+        },
+        {
+            "id": 66,
+            "name": "Uyg`ur QFY"
+        },
+        {
+            "id": 67,
+            "name": "Uyg`ursoy SHFY (1)"
+        },
+        {
+            "id": 68,
+            "name": "Uyg`ursoy SHFY (2)"
+        },
+        {
+            "id": 69,
+            "name": "Uyg`ur MFY"
+        },
+        {
+            "id": 70,
+            "name": "O`zbekiston MFY"
+        },
+        {
+            "id": 71,
+            "name": "Vodiy MFY"
+        },
+        {
+            "id": 72,
+            "name": "H.Olimjon MFY"
+        },
+        {
+            "id": 73,
+            "name": "Xalkobod-1 MFY"
+        },
+        {
+            "id": 74,
+            "name": "Xalkobod-2 MFY"
+        },
+        {
+            "id": 75,
+            "name": "Xalkobod-3 MFY"
+        },
+        {
+            "id": 76,
+            "name": "Xalkobod-4 MFY"
+        },
+        {
+            "id": 77,
+            "name": "Xalqabod SHFY"
+        },
+        {
+            "id": 78,
+            "name": "Hamza MFY"
+        },
+        {
+            "id": 79,
+            "name": "Hazrati bob MFY"
+        },
+        {
+            "id": 80,
+            "name": "Xo`jaobod-1 MFY"
+        },
+        {
+            "id": 81,
+            "name": "Xo`jaobod-2 MFY"
+        },
+        {
+            "id": 82,
+            "name": "Xonobod urta MFY"
+        },
+        {
+            "id": 83,
+            "name": "Yakkatut MFY"
+        },
+        {
+            "id": 84,
+            "name": "Yangier MFY"
+        },
+        {
+            "id": 85,
+            "name": "Yangi qishloq MFY"
+        },
+        {
+            "id": 86,
+            "name": "Yangichek MFY"
+        },
+        {
+            "id": 87,
+            "name": "Yangiobod MFY"
+        },
+        {
+            "id": 88,
+            "name": "Yangihayot QFY"
+        },
+        {
+            "id": 89,
+            "name": "Yu.Xotamov MFY"
+        },
+        {
+            "id": 90,
+            "name": "Yuqori chodak boshi MFY"
+        },
+        {
+            "id": 91,
+            "name": "Yukori qishloq MFY"
+        },
+        {
+            "id": 92,
+            "name": "Nurobod MFY"
+        },
+        {
+            "id": 93,
+            "name": "Ozod MFY"
+        },
+        {
+            "id": 93,
+            "name": "Orom MFY"
+        }
+    ]
+}

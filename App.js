@@ -7,6 +7,7 @@ import { NotificationProvider } from "./src/components/Notification";
 import PhoneScreen from "./src/screens/Phone/PhoneScreen";
 import VerifyScreen from "./src/screens/Screen/VerifyScreen";
 import UserInfoScreen from "./src/screens/UserInfo/UserInfoScreen";
+import { StatusBar } from "expo-status-bar";
 import * as Linking from 'expo-linking';
 import Home from "./src/Main";
 
@@ -51,6 +52,8 @@ export default function App() {
 
   return (
     <NotificationProvider>
+      <StatusBar style="light" backgroundColor="#101820" />
+
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={{

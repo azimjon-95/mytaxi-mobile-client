@@ -110,3 +110,20 @@ export default StyleSheet.create({
         fontWeight: "800",
     },
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

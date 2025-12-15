@@ -1,38 +1,53 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
-
 import styles from "./styles";
 import TaxiAnimatedButton from "./TaxiAnimatedButton";
 
-export default function Header({ hasDriver, onHamburgerPress, cashback, setHasDriver, onBackPress }) {
-    const [navigat, setNavigat] = useState(null);
+export default function Header({
+    hasDriver,
+    onHamburgerPress,
+    cashback,
+    setHasDriver,
+    onBackPress
+}) {
 
+    // 🔥 faqat back bosilganda taxi tugma ochiladi
+    const [carGoing, setCarGoing] = useState(false);
+
+    // BACK bosilganda → TaxiAnimatedButton ochiladi
     const handleBack = () => {
-        if (onBackPress) {
-            onBackPress();
-            setNavigat(null); // back bosilganda default holatga qaytarish
-        }
+        setCarGoing(true);   // TaxiAnimatedButton yoqiladi
+        onBackPress();
     };
 
+
+    // TaxiAnimatedButton bosilganda → refresh + yana carGoing false
     const handleRefresh = () => {
-        setHasDriver("drivers");
-        setNavigat("refresh"); // TaxiAnimatedButton bosilganda back tugmasi faollashadi
+        setHasDriver("driver");
+        setCarGoing(false);
     };
 
-    // hasDriver "main" bo'lsa, barcha tugmalarni yashirish
-    // if (hasDriver === "main" || hasDriver === "availableDrivers") {
-    if (hasDriver === "main" || hasDriver === "availableDrivers" || hasDriver === "driver") {
+    // "main" yoki "availableDrivers" bo‘lsa — faqat hamburger
+    if (hasDriver === "main" || hasDriver === "availableDrivers") {
+
         return (
             <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.hamburgerBtn}
-                    onPress={onHamburgerPress}
-                >
-                    <View style={styles.hamburgerLine} />
-                    <View style={styles.hamburgerLine} />
-                    <View style={styles.hamburgerLine} />
-                </TouchableOpacity>
+                <View style={styles.headerBox}>
+                    <TouchableOpacity style={styles.hamburgerBtn} onPress={onHamburgerPress}>
+                        <View style={styles.hamburgerLine} />
+                        <View style={styles.hamburgerLine} />
+                        <View style={styles.hamburgerLine} />
+                    </TouchableOpacity>
+
+                    {/* TAXI ANIMATED BUTTON (faqat back bosilganda chiqadi) */}
+                    {carGoing && (
+                        <TouchableOpacity onPress={handleRefresh}>
+                            <TaxiAnimatedButton />
+                        </TouchableOpacity>
+                    )}
+                </View>
+
                 {cashback !== undefined && (
                     <View style={styles.cashbackBadge}>
                         <Text style={styles.cashbackText}>💰 {cashback.toLocaleString()} so'm</Text>
@@ -42,16 +57,12 @@ export default function Header({ hasDriver, onHamburgerPress, cashback, setHasDr
         );
     }
 
-    // Agar navigat null bo'lsa, elementlar ko'rinmas
-    const showBackButton = navigat === "refresh" && hasDriver === "driver";
-    const showTaxiButton = navigat === null;
-
     return (
         <View style={styles.header}>
-            {/* Hamburger / Back / TaxiAnimatedButton */}
             <View style={styles.headerBox}>
-                {/* Hamburger tugmasi */}
-                {showTaxiButton && (
+
+                {/* HAMBURGER */}
+                {!carGoing && (
                     <TouchableOpacity
                         style={styles.hamburgerBtn}
                         onPress={onHamburgerPress}
@@ -62,22 +73,17 @@ export default function Header({ hasDriver, onHamburgerPress, cashback, setHasDr
                     </TouchableOpacity>
                 )}
 
-                {/* Back/Home tugmasi */}
-                {!showBackButton && (
+                {/* HOME / BACK BUTTON */}
+                {!carGoing && (
                     <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
-                        <Icon name="home" size={28} color="white" />
+                        <Icon name="home" size={28} color="#00ff7f" />
                     </TouchableOpacity>
                 )}
 
-                {/* TaxiAnimatedButton */}
-                {!showTaxiButton && (
-                    <TouchableOpacity onPress={handleRefresh}>
-                        <TaxiAnimatedButton />
-                    </TouchableOpacity>
-                )}
+
             </View>
 
-            {/* Cashback */}
+            {/* CASHBACK */}
             {cashback !== undefined && (
                 <View style={styles.cashbackBadge}>
                     <Text style={styles.cashbackText}>💰 {cashback.toLocaleString()} so'm</Text>

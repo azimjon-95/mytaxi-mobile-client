@@ -62,7 +62,7 @@ export default function VerifyScreen({ navigation, route }) {
                 style={styles.input}
                 keyboardType="number-pad"
                 placeholder="• • • •"
-                placeholderTextColor="rgba(255,194,0,0.3)"
+                placeholderTextColor="#00ff8097"
                 value={code}
                 onChangeText={setCode}
                 maxLength={4}
@@ -78,13 +78,7 @@ export default function VerifyScreen({ navigation, route }) {
                 {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Tasdiqlash</Text>}
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.resendBtn}>
-                <Text style={styles.resendText}>Kodni qayta yuborish</Text>
-            </TouchableOpacity>
 
-            <Text style={styles.disclaimer}>
-                Kodni olmadingizmi? Bir necha daqiqa kuting
-            </Text>
         </View>
     );
 }

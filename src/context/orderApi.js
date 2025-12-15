@@ -34,16 +34,6 @@ export const orderApi = api.injectEndpoints({
             invalidatesTags: ["Orders"],
         }),
 
-        // =================== CANCEL ORDER ===================
-        cancelOrder: builder.mutation({
-            query: ({ id, reason }) => ({
-                url: `/orders/${id}/cancel`,
-                method: "POST",
-                body: { reason },
-            }),
-            invalidatesTags: ["Orders"],
-        }),
-
         // =================== DELETE ORDER ===================
         deleteOrder: builder.mutation({
             query: (id) => ({
@@ -53,14 +43,6 @@ export const orderApi = api.injectEndpoints({
             invalidatesTags: ["Orders"],
         }),
 
-        // =================== DRIVER SELECT ORDER ===================
-        // selectDriver: builder.mutation({
-        //     query: (data) => ({
-        //         url: "/orders/select-driver",
-        //         method: "POST",
-        //         body: data,
-        //     }),
-        // }),
 
         // =================== CLIENT ASSIGNS DRIVER ===================
         assignDriverByClient: builder.mutation({
@@ -125,6 +107,17 @@ export const orderApi = api.injectEndpoints({
                 body: { orderId, driverId },
             }),
         }),
+
+
+        // post("/orders/cancel/:orderId", orderCtrl.cancelOrder);
+        cancelOrder: builder.mutation({
+            query: ({ orderId, body }) => ({
+                url: `/orders/cancel/${orderId}`,
+                method: "POST",
+                body,
+            }),
+        }),
+
     }),
 });
 
@@ -134,14 +127,14 @@ export const {
     useGetOrdersQuery,
     useGetOrderByIdQuery,
     useUpdateOrderMutation,
-    useCancelOrderMutation,
     useDeleteOrderMutation,
-    // useSelectDriverMutation,
     useAssignDriverByClientMutation,
     useStartMeterMutation,
     useUpdateMeterMutation,
     useCompleteOrderMutation,
     useWatchActiveOrderQuery,
     useGetAvailableDriversQuery,
-    useAssignDriverMutation
+    useAssignDriverMutation,
+    useCancelOrderMutation,
+
 } = orderApi;

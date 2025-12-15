@@ -48,6 +48,12 @@ export default function Main() {
       orderId: orderData,
     },
   );
+  useEffect(() => {
+    socket.on("availableDriversUpdate", () => {
+      refetch();
+    });
+    return () => socket.off("availableDriversUpdate");
+  }, [refetch]);
 
 
   // 🔥 1. Statusni boshqaradigan umumiy handler
@@ -55,6 +61,7 @@ export default function Main() {
     const status = data?.status;
     if (status === "main") {
       await AsyncStorage.removeItem("activeOrderStatus");
+      await AsyncStorage.removeItem("panding");
       setAvailableDrivers([]);
       setDrivers(null);
       setHasDriver("main");
@@ -85,13 +92,6 @@ export default function Main() {
     handleStatusUpdate(innerData);
   }, [apiData]);
 
-  useEffect(() => {
-    socket.on("availableDriversUpdate", () => {
-      refetch();
-    });
-    return () => socket.off("availableDriversUpdate");
-  }, [refetch]);
-
 
   if (isLoading) {
     return (
@@ -107,7 +107,7 @@ export default function Main() {
         <View style={{
           flex: 1,
           backgroundColor: "#101820",
-          paddingTop: 10,
+          // paddingTop: 10,
           display: "flex",
           flexDirection: "column",
           height: screenHeight,
