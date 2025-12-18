@@ -10,7 +10,6 @@ export const configApi = api.injectEndpoints({
         // GET
         getCarTypes: builder.query({
             query: () => "/config/car-types",
-            providesTags: ["CarTypes"],
         }),
 
         // CREATE
@@ -20,7 +19,6 @@ export const configApi = api.injectEndpoints({
                 method: "POST",
                 body,
             }),
-            invalidatesTags: ["CarTypes"],
         }),
 
         // UPDATE
@@ -30,7 +28,6 @@ export const configApi = api.injectEndpoints({
                 method: "PUT",
                 body,
             }),
-            invalidatesTags: ["CarTypes"],
         }),
 
         // DELETE
@@ -39,7 +36,6 @@ export const configApi = api.injectEndpoints({
                 url: `/config/car-types/${id}`,
                 method: "DELETE",
             }),
-            invalidatesTags: ["CarTypes"],
         }),
 
         /* ======================
@@ -49,7 +45,6 @@ export const configApi = api.injectEndpoints({
         // GET
         getServices: builder.query({
             query: () => "/config/services",
-            providesTags: ["Services"],
         }),
 
         // CREATE
@@ -59,7 +54,6 @@ export const configApi = api.injectEndpoints({
                 method: "POST",
                 body,
             }),
-            invalidatesTags: ["Services"],
         }),
 
         // UPDATE
@@ -69,7 +63,6 @@ export const configApi = api.injectEndpoints({
                 method: "PUT",
                 body,
             }),
-            invalidatesTags: ["Services"],
         }),
 
         // DELETE
@@ -78,7 +71,6 @@ export const configApi = api.injectEndpoints({
                 url: `/config/services/${id}`,
                 method: "DELETE",
             }),
-            invalidatesTags: ["Services"],
         }),
 
     }),

@@ -9,6 +9,7 @@ export default StyleSheet.create({
     },
 
     modalBox: {
+        paddingBottom: 10,
         backgroundColor: "#101820",
         color: "#fff",
         padding: 10,

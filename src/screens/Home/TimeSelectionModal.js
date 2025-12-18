@@ -6,10 +6,11 @@ import {
     Pressable,
     ActivityIndicator,
     TouchableOpacity,
-    ScrollView,
-    Image,
     TextInput,
-    Animated, Dimensions
+    Dimensions,
+    FlatList,
+    Image,
+    Platform,
 } from "react-native";
 import { useDispatch } from "react-redux";
 import * as Location from "expo-location";
@@ -31,31 +32,32 @@ import { useGetServicesQuery, useGetCarTypesQuery } from "../../context/configAp
 //     PROVIDER_GOOGLE = Maps.PROVIDER_GOOGLE;
 // }
 
-
 const TimeSelectionModal = ({ visible, onClose, setTimeSelected, setHasDriver }) => {
     const dispatch = useDispatch();
-    const timeOptions = [
-        { label: "Chaqirish", value: "waiting" },
-    ];
+    const timeOptions = [{ label: "Chaqirish", value: "waiting" }];
     const [selectedService, setSelectedService] = useState(null);
-    const [createOrder, { isLoading }] = useCreateOrderMutation();
-    const [selectedTime, setSelectedTime] = useState(null);
     const [selectedCar, setSelectedCar] = useState("econom");
+    const [selectedTime, setSelectedTime] = useState(null);
     const [userLocation, setUserLocation] = useState(null);
     const [loadingLocation, setLoadingLocation] = useState(true);
-    const mapRef = useRef(null);
-    const { data: services } = useGetServicesQuery();
-    const { data: carTypes } = useGetCarTypesQuery();
-    const scrollXCar = useRef(new Animated.Value(0)).current;
-    const scrollXService = useRef(new Animated.Value(0)).current;
     const [destination, setDestination] = useState("");
+    const mapRef = useRef(null);
     const { width } = Dimensions.get("window");
-    const ITEM_WIDTH = width / 5 - 10; // ekran bo‘yicha 5 ta kartaga teng
 
+    const { data: carTypes } = useGetCarTypesQuery();
+    const { data: services } = useGetServicesQuery();
+    const [createOrder, { isLoading }] = useCreateOrderMutation();
+
+    // 🔹 DEFAULT CAR
     useEffect(() => {
-        if (visible) {
-            getUserLocation();
+        if (carTypes?.message?.length) {
+            setSelectedCar("econom");
         }
+    }, [carTypes]);
+
+    // 🔹 GET USER LOCATION
+    useEffect(() => {
+        if (visible) getUserLocation();
     }, [visible]);
 
     const getUserLocation = async () => {
@@ -86,6 +88,7 @@ const TimeSelectionModal = ({ visible, onClose, setTimeSelected, setHasDriver })
         }
     };
 
+    // 🔹 SEND ORDER
     const sendOrder = async (timeOption) => {
         setSelectedTime(timeOption.label);
         dispatch(setOrderLoading(true));
@@ -115,48 +118,49 @@ const TimeSelectionModal = ({ visible, onClose, setTimeSelected, setHasDriver })
             const orderPrice = Math.floor(Math.random() * 30000) + 15000;
             const orderCashback = Math.floor(orderPrice * 0.1);
 
-            let orderTime = dayjs();
-            if (timeOption.value === "created") {
-                if (timeOption.label === 1) {
-                    orderTime = orderTime.add(1, "hour");
-                } else {
-                    orderTime = orderTime.add(timeOption.label, "minute");
-                }
-            }
-            const formattedTime = orderTime.format("HH:mm");
+            const orderTime = dayjs().format("HH:mm");
 
             const newOrder = {
-                id: Date.now(),
                 clientId: user?._id,
                 date: dayjs().format("YYYY-MM-DD"),
-                time: formattedTime,
+                time: orderTime,
                 from: user.address,
-                to: destination || "Manzil " + Math.floor(Math.random() * 100), // foydalanuvchi kiritgan yoki default
+                to: destination || "Manzil " + Math.floor(Math.random() * 100),
                 price: orderPrice,
                 cashback: orderCashback,
                 when: timeOption.value,
                 location: coords,
                 phoneId: user.phone,
-                carType: selectedCar,
+                carType: carTypes?.message?.find(c => c.value === selectedCar)
+                    ? {
+                        carTypeId: carTypes.message.find(c => c.value === selectedCar)._id,
+                        label: carTypes.message.find(c => c.value === selectedCar).label,
+                        price: carTypes.message.find(c => c.value === selectedCar).price,
+                    }
+                    : null,
                 service: selectedService
+                    ? {
+                        serviceId: selectedService._id,
+                        name: selectedService.value,
+                        price: selectedService.price
+                    }
+                    : null,
             };
 
             const response = await createOrder(newOrder).unwrap();
             setHasDriver("availableDrivers");
+
             await AsyncStorage.setItem(
                 "activeOrderStatus",
-                JSON.stringify({
-                    status: true, order: response?.innerData
-                })
+                JSON.stringify({ status: true, order: response?.innerData })
             );
 
             dispatch(setActiveOrder(response?.innerData));
             setTimeSelected(true);
-
             Notification("Buyurtma muvaffaqiyatli yaratildi", "success");
 
         } catch (e) {
-            Notification(`Buyurtma yuborishda xatolik: ${e?.data.message}`, "error");
+            Notification(`Buyurtma yuborishda xatolik: ${e?.data?.message || e.message}`, "error");
             setSelectedTime(null);
         } finally {
             setSelectedTime(null);
@@ -165,17 +169,19 @@ const TimeSelectionModal = ({ visible, onClose, setTimeSelected, setHasDriver })
         }
     };
 
+    // 🔹 MAP ANIMATION
     useEffect(() => {
-        if (mapRef.current) {
+        if (mapRef.current && userLocation) {
             mapRef.current.animateToRegion({
                 latitude: userLocation.latitude,
                 longitude: userLocation.longitude,
-                latitudeDelta: 0.015, // juda yaqin
-                longitudeDelta: 0.015, // juda yaqin
-            }, 1000); // 1 soniya animatsiya bilan
+                latitudeDelta: 0.015,
+                longitudeDelta: 0.015,
+            }, 1000);
         }
     }, [userLocation]);
-    // 🔥 Render Map Component
+
+    // 🔹 RENDER MAP
     const renderMap = () => {
         if (loadingLocation) {
             return (
@@ -194,10 +200,8 @@ const TimeSelectionModal = ({ visible, onClose, setTimeSelected, setHasDriver })
             );
         }
 
-        // 🔥 For Web Platform - Use Yandex Map (No API key needed)
-        // if (Platform.OS !== 'web') {
+        // if (Platform.OS === 'web') {
         const { latitude, longitude } = userLocation;
-
         return (
             <View style={styles.webLocationInfo}>
                 <iframe
@@ -215,153 +219,119 @@ const TimeSelectionModal = ({ visible, onClose, setTimeSelected, setHasDriver })
         );
         // }
 
-        // 🔥 For Native Platforms - Use react-native-maps
-        // return (
-        //     <View style={styles.webLocationInfo}>
-        //         <MapView
-        //             ref={mapRef}
-        //             provider={PROVIDER_GOOGLE}
-        //             style={styles.map}
-        //             initialRegion={{
-        //                 latitude: userLocation.latitude,
-        //                 longitude: userLocation.longitude,
-        //                 latitudeDelta: 0.007, // juda yaqin
-        //                 longitudeDelta: 0.007, // juda yaqin
-        //             }}
-        //             showsMyLocationButton={true} // lokatsiya tugmasi qoladi
-        //             showsUserLocation={false}    // default ko‘k nuqta yo‘q
-        //             loadingEnabled={true}
-        //             mapType="standard"
-        //         >
-        //             <Marker
-        //                 coordinate={{
-        //                     latitude: userLocation.latitude,
-        //                     longitude: userLocation.longitude,
-        //                 }}
-        //                 title="Sizning joylashuvingiz"
-        //                 description="Taksi shu yerga keladi"
-
-        //             >
-        //                 <Image
-        //                     source={require("../../assets/you.png")} // marker uchun icon
-        //                     style={{
-        //                         width: 35,         // marker kengligi
-        //                         height: 35,        // marker bo‘yi
-        //                         resizeMode: "contain", // rasmni proportsional saqlash
-        //                         marginBottom: 10,  // marker tipini koordinataga moslashtirish
-        //                         shadowOffset: { width: 0, height: 2 },
-        //                         shadowOpacity: 0.3,
-        //                         shadowRadius: 2,
-        //                         elevation: 5,       // Android uchun soya
-        //                     }}
-        //                 />
-        //             </Marker>
-        //         </MapView>
-        //     </View>
-        // );
-    };
-
-
-    // =========================
-    const renderCarTypes = () => {
         return (
-            <Animated.ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                onScroll={Animated.event(
-                    [{ nativeEvent: { contentOffset: { x: scrollXCar } } }],
-                    { useNativeDriver: false }
-                )}
-                scrollEventThrottle={16}
-            >
-                {carTypes?.message?.map((car, index) => {
-                    return (
-                        <TouchableOpacity
-                            key={index}
-                            onPress={() => setSelectedCar(car.value)}
-                            style={[
-                                styles.card,
-                                selectedCar === car.value && styles.activeCard,
-                            ]}
-                        >
-                            <Image source={car.image}
-                                style={styles.image}
-                            />
-                            <Text style={[styles.label, selectedCar === car.value && styles.activeLabel]}>{car.label}</Text>
-                        </TouchableOpacity>
-                    );
-                })}
-            </Animated.ScrollView>
+            <View style={styles.webLocationInfo}>
+                <MapView
+                    ref={mapRef}
+                    provider={PROVIDER_GOOGLE}
+                    style={styles.map}
+                    initialRegion={{
+                        latitude: userLocation.latitude,
+                        longitude: userLocation.longitude,
+                        latitudeDelta: 0.007,
+                        longitudeDelta: 0.007,
+                    }}
+                    showsMyLocationButton={true}
+                    showsUserLocation={false}
+                    loadingEnabled={true}
+                    mapType="standard"
+                >
+                    <Marker
+                        coordinate={{
+                            latitude: userLocation.latitude,
+                            longitude: userLocation.longitude,
+                        }}
+                        title="Sizning joylashuvingiz"
+                        description="Taksi shu yerga keladi"
+                    >
+                        <Image
+                            source={require("../../assets/you.png")}
+                            style={{
+                                width: 35,
+                                height: 35,
+                                resizeMode: "contain",
+                                marginBottom: 10,
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowOpacity: 0.3,
+                                shadowRadius: 2,
+                                elevation: 5,
+                            }}
+                        />
+                    </Marker>
+                </MapView>
+            </View>
         );
     };
 
-    const renderServices = () => {
-        return (
-            <Animated.ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                onScroll={Animated.event(
-                    [{ nativeEvent: { contentOffset: { x: scrollXService } } }],
-                    { useNativeDriver: false }
-                )}
-                scrollEventThrottle={16}
-                contentContainerStyle={{ marginBottom: 10 }}
-            >
-                {services?.message?.map((service, index) => {
-                    const scale = scrollXService.interpolate({
-                        inputRange: [
-                            (index - 1) * (ITEM_WIDTH + 8),
-                            index * (ITEM_WIDTH + 8),
-                            (index + 1) * (ITEM_WIDTH + 8),
-                        ],
-                        outputRange: [0.95, 1, 0.95],
-                        extrapolate: "clamp",
-                    });
+    // 🔹 RENDER CAR TYPES
+    const renderCarTypes = () => (
+        <FlatList
+            data={carTypes?.message?.filter(c => c.isActive)}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={{ paddingVertical: 5 }}
+            renderItem={({ item }) => {
+                const active = selectedCar === item.value;
+                return (
+                    <TouchableOpacity
+                        onPress={() => setSelectedCar(item.value)}
+                        style={[styles.card, active && styles.activeCard]}
+                    >
+                        <Image source={{ uri: item.image }} style={styles.image} />
+                        <Text style={[styles.label, active && styles.activeLabel]}>
+                            {item.label}
+                        </Text>
+                        {/* <Text style={styles.priceText}>+{item.price.toLocaleString()} so‘m</Text> */}
+                    </TouchableOpacity>
+                );
+            }}
+        />
+    );
 
-                    const isSelected = selectedService?.value === service.value;
-
-                    return (
-                        <Animated.View
-                            key={service.value}
-                            style={[
-                                styles.picker_li,
-                                {
-                                    transform: [{ scale }],
-                                },
-                                isSelected && styles.activeCard_li,
-                            ]}
-                        >
-                            <TouchableOpacity
-                                onPress={() => setSelectedService(isSelected ? null : service)}
-                                style={{ alignItems: "center", justifyContent: "center", flex: 1 }}
-                            >
-                                <Text style={[styles.serviceText_li, isSelected && styles.activeLabel_li]}>{service.value}</Text>
-                                <Text style={[styles.priceText_li, isSelected && styles.activeLabel_li]}>
-                                    {service.price.toLocaleString()} so‘m
-                                </Text>
-                            </TouchableOpacity>
-                        </Animated.View>
-                    );
-                })}
-            </Animated.ScrollView>
-        );
-    };
+    // 🔹 RENDER SERVICES
+    const renderServices = () => (
+        <FlatList
+            data={services?.message}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item._id}
+            contentContainerStyle={{ paddingBottom: 10 }}
+            renderItem={({ item }) => {
+                const isSelected = selectedService?._id === item._id;
+                return (
+                    <TouchableOpacity
+                        onPress={() => setSelectedService(isSelected ? null : item)}
+                        style={[styles.picker_li, isSelected && styles.activeCard_li]}
+                    >
+                        <Text style={[styles.serviceText_li, isSelected && styles.activeLabel_li]}>
+                            {item.value}
+                        </Text>
+                        <Text style={[styles.priceText_li, isSelected && styles.activeLabel_li]}>
+                            {item.price.toLocaleString()} so‘m
+                        </Text>
+                    </TouchableOpacity>
+                );
+            }}
+        />
+    );
 
     return (
         <Modal animationType="slide" transparent visible={visible}>
             <View style={styles.modalContainer}>
                 <View style={styles.modalBox}>
-                    {/* 🔥 MAP CONTAINER */}
-                    <View style={styles.mapContainer}>
-                        {renderMap()}
-                    </View>
+                    {/* MAP */}
+                    <View style={styles.mapContainer}>{renderMap()}</View>
 
+                    {/* CAR TYPES */}
                     <Text style={[styles.modalTitle, { marginTop: 10 }]}>Taksi turi</Text>
                     {renderCarTypes()}
 
+                    {/* SERVICES */}
                     <Text style={[styles.modalTitle, { marginTop: 10 }]}>Qo'shimcha xizmatlar</Text>
                     {renderServices()}
 
+                    {/* DESTINATION INPUT */}
                     <View style={styles.timeContainer}>
                         <TextInput
                             style={{
@@ -369,21 +339,21 @@ const TimeSelectionModal = ({ visible, onClose, setTimeSelected, setHasDriver })
                                 flex: 1,
                                 borderColor: "#ffffff",
                                 borderWidth: 1,
-                                color: "#bcbcbcd5",
+                                color: "#c79393d4",
                                 borderRadius: 8,
                                 paddingHorizontal: 10,
                                 marginBottom: 10,
                             }}
-                            placeholder="Qayerga bormoqchisiz yoki taksi chaqirishdan maqsadingiz? (Yozing...✍🏻)"
+                            placeholder="Qayerga bormoqchisiz yoki maqsadingiz? (Yozing...)"
                             value={destination}
                             onChangeText={setDestination}
-                            multiline={true}       // ko‘p qatorli qilish
-                            numberOfLines={4}      // balandlik bo‘yicha
+                            multiline={true}
+                            numberOfLines={4}
                         />
                     </View>
-                    <View style={styles.timeContainer}>
 
-                        {/* CANCEL BUTTON */}
+                    {/* TIME BUTTONS + CANCEL */}
+                    <View style={styles.timeContainer}>
                         <Pressable
                             style={[styles.cancelBtn, selectedTime && { opacity: 0.6 }]}
                             onPress={onClose}
@@ -392,27 +362,17 @@ const TimeSelectionModal = ({ visible, onClose, setTimeSelected, setHasDriver })
                             <Icon name="close" size={25} color="#ff3b3b" />
                         </Pressable>
 
-                        {/* TIME BUTTONS */}
                         {timeOptions.map((t, i) => (
                             <Pressable
                                 key={i}
-                                style={[
-                                    styles.timeBtn,
-                                    selectedTime && selectedTime !== t.label && { opacity: 0.6 }
-                                ]}
+                                style={[styles.timeBtn, selectedTime && selectedTime !== t.label && { opacity: 0.6 }]}
                                 onPress={() => sendOrder(t)}
                                 disabled={!!selectedTime}
                             >
                                 {selectedTime === t.label && isLoading ? (
                                     <ActivityIndicator color="#fff" />
                                 ) : (
-                                    <Text style={styles.timeBtnText}>
-                                        {t.value === "created" && t.label === 1
-                                            ? "1 soat"
-                                            : t.value === "created"
-                                                ? `${t.label} minut`
-                                                : t.label}
-                                    </Text>
+                                    <Text style={styles.timeBtnText}>{t.label}</Text>
                                 )}
                             </Pressable>
                         ))}
